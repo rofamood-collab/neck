@@ -24,6 +24,7 @@ const rulerValue = document.querySelector("#rulerValue");
 const totalClicks = document.querySelector("#totalClicks");
 const topPlayer = document.querySelector("#topPlayer");
 const statsList = document.querySelector("#statsList");
+let audioContext = null;
 
 let selectedRole = "viewer";
 let currentUser = null;
@@ -34,8 +35,8 @@ let hostPassword = "bureokjam";
 
 const defaultState = {
   neckMm: 0,
-  growMm: 0.5,
-  shrinkMm: 1.2,
+  growMm: 5,
+  shrinkMm: 12,
   totalClicks: 0,
   users: {},
   updatedAt: Date.now()
@@ -172,10 +173,10 @@ function mutateState(mutator) {
 }
 
 function normalizeGameState(current) {
-  if (Number(current.growMm || 0) > 2) {
+  if (Number(current.growMm || 0) !== defaultState.growMm) {
     current.growMm = defaultState.growMm;
   }
-  if (Number(current.shrinkMm || 0) > 4) {
+  if (Number(current.shrinkMm || 0) !== defaultState.shrinkMm) {
     current.shrinkMm = defaultState.shrinkMm;
   }
   return current;
@@ -183,6 +184,7 @@ function normalizeGameState(current) {
 
 function clickNeck() {
   if (!currentUser) return;
+  playClickSound(currentUser.role);
 
   mutateState(current => {
     const users = { ...(current.users || {}) };
@@ -215,10 +217,8 @@ function render() {
   const mm = Math.max(0, Number(state.neckMm || 0));
   const displayMm = Math.round(mm * 10) / 10;
   const height = Math.min(1800, mm * 38);
-  const scale = Math.max(0.36, Math.min(1, 1 - mm / 150));
   const lengthLabel = formatLength(mm);
   neckColumn.style.height = `${height}px`;
-  stretchStack.style.setProperty("--stretch-scale", scale.toFixed(3));
   neckMessage.textContent = `부레옼잠의 목이 ${lengthLabel} 늘어났다!`;
   rulerValue.textContent = lengthLabel;
 
@@ -260,6 +260,27 @@ function formatNumber(value) {
   return rounded.toLocaleString("ko-KR", {
     maximumFractionDigits: 2
   });
+}
+
+function playClickSound(role) {
+  try {
+    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioContext.currentTime;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(role === "host" ? 220 : 660, now);
+    oscillator.frequency.exponentialRampToValueAtTime(role === "host" ? 120 : 990, now + 0.08);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.16, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.12);
+  } catch {
+    // Audio is optional; browsers may block it in some preview modes.
+  }
 }
 
 function escapeHtml(value) {
