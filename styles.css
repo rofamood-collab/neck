@@ -97,6 +97,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   min-height: 44px;
 }
 
@@ -135,6 +136,31 @@ button {
   font-size: 13px;
   font-weight: 1000;
   box-shadow: 4px 4px 0 var(--line);
+}
+
+.live-counts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.live-counts span {
+  border: 3px solid var(--line);
+  border-radius: 0;
+  background: #fffaf0;
+  color: var(--ink);
+  padding: 5px 7px;
+  font-size: 12px;
+  font-weight: 1000;
+  line-height: 1;
+  box-shadow: 3px 3px 0 var(--line);
+  white-space: nowrap;
+}
+
+.live-counts b {
+  color: var(--red);
 }
 
 .counter {
