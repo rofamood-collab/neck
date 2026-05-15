@@ -363,11 +363,16 @@ function render() {
   stretchStack.style.setProperty("--zoom", visualZoom(height).toFixed(3));
   appRoot.style.setProperty("--altitude", altitude.toFixed(3));
   appRoot.style.setProperty("--ground-alpha", background.ground.toFixed(3));
+  appRoot.style.setProperty("--city-alpha", background.city.toFixed(3));
+  appRoot.style.setProperty("--sun-alpha", background.sun.toFixed(3));
   appRoot.style.setProperty("--cloud-alpha", background.cloud.toFixed(3));
+  appRoot.style.setProperty("--cloud-scene-alpha", background.cloudScene.toFixed(3));
   appRoot.style.setProperty("--sky-alpha", background.sky.toFixed(3));
   appRoot.style.setProperty("--high-sky-alpha", background.highSky.toFixed(3));
+  appRoot.style.setProperty("--strato-alpha", background.strato.toFixed(3));
   appRoot.style.setProperty("--space-alpha", background.space.toFixed(3));
   appRoot.style.setProperty("--star-alpha", background.star.toFixed(3));
+  appRoot.style.setProperty("--nebula-alpha", background.nebula.toFixed(3));
   appRoot.style.setProperty("--cloud-shift", `${background.cloudShift}px`);
   neckMessage.textContent = `부레옼잠의 목이 ${lengthLabel} 늘어났다!`;
   rulerValue.textContent = lengthLabel;
@@ -425,21 +430,31 @@ function altitudeProgress(mm) {
 
 function backgroundProgress(mm) {
   const meters = mm / 1000;
-  const ground = 1 - clamp01(meters / 3000);
-  const cloud = 1 - clamp01((meters - 1500) / 10500);
-  const sky = 1 - clamp01((meters - 50000) / 50000);
-  const highSky = clamp01((meters - 12000) / 38000) * (1 - clamp01((meters - 85000) / 30000));
-  const space = clamp01((meters - 50000) / 50000);
+  const ground = 1 - clamp01(meters / 3500);
+  const city = 1 - clamp01(meters / 1600);
+  const sun = 1 - clamp01(meters / 7000);
+  const cloud = 1 - clamp01((meters - 2500) / 11500);
+  const cloudScene = clamp01((meters - 800) / 9000) * (1 - clamp01((meters - 32000) / 26000));
+  const sky = 1 - clamp01((meters - 52000) / 48000);
+  const highSky = clamp01((meters - 12000) / 38000) * (1 - clamp01((meters - 82000) / 26000));
+  const strato = clamp01((meters - 12000) / 42000) * (1 - clamp01((meters - 92000) / 26000));
+  const space = clamp01((meters - 62000) / 38000);
   const star = clamp01((meters - 70000) / 30000);
+  const nebula = clamp01((meters - 105000) / 220000);
 
   return {
     ground,
+    city,
+    sun,
     cloud,
+    cloudScene,
     sky,
     highSky,
+    strato,
     space,
     star,
-    cloudShift: Math.round(Math.min(1800, meters * 0.32))
+    nebula,
+    cloudShift: Math.round(Math.min(1800, meters * 0.34))
   };
 }
 
