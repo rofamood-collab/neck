@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>부레옼잠 목늘리기</title>
-    <link rel="stylesheet" href="./styles.css?v=20260515-presence-count" />
+    <link rel="stylesheet" href="./styles.css?v=20260515-volume-control" />
   </head>
   <body>
     <main class="phone-app" data-screen="gate">
@@ -49,6 +49,11 @@
           <button class="main-click" id="mainClick" type="button" disabled>
             <span id="clickVerb">목 늘리기</span>
           </button>
+          <label class="volume-control" for="volumeSlider">
+            <span>소리</span>
+            <input id="volumeSlider" type="range" min="0" max="100" value="35" />
+            <b id="volumeValue">35</b>
+          </label>
           <button class="reset-button hidden" id="resetButton" type="button">처음으로 리셋</button>
           <p class="sync-note" id="syncNote">로컬 테스트 모드</p>
         </section>
@@ -105,7 +110,7 @@
       </dialog>
     </main>
 
-    <script src="./firebase-config.js?v=20260515-presence-count"></script>
-    <script src="./app.js?v=20260515-presence-count"></script>
+    <script src="./firebase-config.js?v=20260515-volume-control"></script>
+    <script src="./app.js?v=20260515-volume-control"></script>
   </body>
 </html>
