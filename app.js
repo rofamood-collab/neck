@@ -26,9 +26,12 @@ const rulerValue = document.querySelector("#rulerValue");
 const totalClicks = document.querySelector("#totalClicks");
 const topPlayer = document.querySelector("#topPlayer");
 const statsList = document.querySelector("#statsList");
+const onlineCount = document.querySelector("#onlineCount");
+const activeClickerCount = document.querySelector("#activeClickerCount");
 let audioContext = null;
 const clientId = createId();
 let lastSoundEventId = null;
+let presenceTimer = null;
 
 let selectedRole = "viewer";
 let currentUser = null;
@@ -43,6 +46,7 @@ const defaultState = {
   shrinkMm: 720,
   totalClicks: 0,
   users: {},
+  presence: {},
   lastEvent: null,
   updatedAt: Date.now()
 };
@@ -151,6 +155,7 @@ function enterApp(event) {
   appRoot.dataset.screen = "play";
   mainClick.disabled = false;
   resetButton.classList.toggle("hidden", currentUser.role !== "host");
+  startPresence();
   clickVerb.textContent = currentUser.role === "host" ? "목 줄이기" : "목 늘리기";
   playerLabel.textContent =
     currentUser.role === "host"
@@ -199,6 +204,7 @@ function clickNeck() {
 
   mutateState(current => {
     const users = { ...(current.users || {}) };
+    const presence = { ...(current.presence || {}) };
     const key = currentUser.role === "host" ? HOST_NAME : currentUser.name;
     const user = users[key] || { clicks: 0, growMm: 0, shrinkMm: 0 };
 
@@ -213,7 +219,14 @@ function clickNeck() {
     }
 
     users[key] = user;
+    presence[clientId] = {
+      name: key,
+      role: currentUser.role,
+      lastSeen: Date.now(),
+      lastClickAt: Date.now()
+    };
     current.users = users;
+    current.presence = prunePresence(presence);
     current.lastEvent = { ...clickEvent, name: key };
     current.totalClicks = Number(current.totalClicks || 0) + 1;
     current.updatedAt = Date.now();
@@ -239,6 +252,7 @@ function resetGame() {
       ...defaultState,
       growMm: current.growMm || defaultState.growMm,
       shrinkMm: current.shrinkMm || defaultState.shrinkMm,
+      presence: prunePresence(current.presence || {}),
       lastEvent: {
         id: createId(),
         role: "host",
@@ -250,6 +264,48 @@ function resetGame() {
       updatedAt: Date.now()
     };
   });
+}
+
+function startPresence() {
+  stopPresence();
+  updatePresence();
+  presenceTimer = window.setInterval(updatePresence, 6000);
+}
+
+function stopPresence() {
+  if (presenceTimer) {
+    window.clearInterval(presenceTimer);
+    presenceTimer = null;
+  }
+}
+
+function updatePresence() {
+  if (!currentUser) {
+    return;
+  }
+
+  mutateState(current => {
+    const key = currentUser.role === "host" ? HOST_NAME : currentUser.name;
+    const presence = { ...(current.presence || {}) };
+    presence[clientId] = {
+      ...(presence[clientId] || {}),
+      name: key,
+      role: currentUser.role,
+      lastSeen: Date.now()
+    };
+    current.presence = prunePresence(presence);
+    current.updatedAt = Date.now();
+    return current;
+  });
+}
+
+function prunePresence(presence) {
+  const now = Date.now();
+  return Object.fromEntries(
+    Object.entries(presence || {}).filter(([, item]) => {
+      return now - Number(item?.lastSeen || 0) < 20000;
+    })
+  );
 }
 
 function receiveState(nextState) {
@@ -295,9 +351,14 @@ function render() {
   const users = Object.entries(state.users || {}).sort((a, b) => {
     return Number(b[1].clicks || 0) - Number(a[1].clicks || 0);
   });
+  const now = Date.now();
+  const online = Object.values(state.presence || {}).filter(item => now - Number(item?.lastSeen || 0) < 20000);
+  const activeClickers = online.filter(item => now - Number(item?.lastClickAt || 0) < 20000);
 
   totalClicks.textContent = Number(state.totalClicks || 0).toLocaleString("ko-KR");
   topPlayer.textContent = users[0]?.[0] || "-";
+  onlineCount.textContent = online.length.toLocaleString("ko-KR");
+  activeClickerCount.textContent = activeClickers.length.toLocaleString("ko-KR");
   statsList.innerHTML = "";
 
   for (const [name, data] of users) {
