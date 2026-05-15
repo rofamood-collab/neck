@@ -17,6 +17,7 @@ const mainClick = document.querySelector("#mainClick");
 const clickVerb = document.querySelector("#clickVerb");
 const playerLabel = document.querySelector("#playerLabel");
 const syncNote = document.querySelector("#syncNote");
+const stage = document.querySelector("#stage");
 const neckColumn = document.querySelector("#neckColumn");
 const stretchStack = document.querySelector("#stretchStack");
 const neckMessage = document.querySelector("#neckMessage");
@@ -35,8 +36,8 @@ let hostPassword = "bureokjam";
 
 const defaultState = {
   neckMm: 0,
-  growMm: 10,
-  shrinkMm: 24,
+  growMm: 1000,
+  shrinkMm: 2400,
   totalClicks: 0,
   users: {},
   updatedAt: Date.now()
@@ -216,9 +217,20 @@ function render() {
 
   const mm = Math.max(0, Number(state.neckMm || 0));
   const displayMm = Math.round(mm * 10) / 10;
-  const height = Math.min(1800, mm * 38);
+  const height = Math.min(100000, Math.sqrt(mm) * 22);
+  const altitude = altitudeProgress(mm);
+  const background = backgroundProgress(mm);
   const lengthLabel = formatLength(mm);
   neckColumn.style.height = `${height}px`;
+  neckColumn.style.setProperty("--neck-flow", `${-Math.round((mm / 1000) * 18)}px`);
+  appRoot.style.setProperty("--altitude", altitude.toFixed(3));
+  appRoot.style.setProperty("--ground-alpha", background.ground.toFixed(3));
+  appRoot.style.setProperty("--cloud-alpha", background.cloud.toFixed(3));
+  appRoot.style.setProperty("--sky-alpha", background.sky.toFixed(3));
+  appRoot.style.setProperty("--high-sky-alpha", background.highSky.toFixed(3));
+  appRoot.style.setProperty("--space-alpha", background.space.toFixed(3));
+  appRoot.style.setProperty("--star-alpha", background.star.toFixed(3));
+  appRoot.style.setProperty("--cloud-shift", `${background.cloudShift}px`);
   neckMessage.textContent = `부레옼잠의 목이 ${lengthLabel} 늘어났다!`;
   rulerValue.textContent = lengthLabel;
 
@@ -246,6 +258,50 @@ function render() {
     empty.textContent = "아직 클릭한 사람이 없어요.";
     statsList.appendChild(empty);
   }
+}
+
+function altitudeProgress(mm) {
+  const meters = mm / 1000;
+  const bands = [
+    [0, 12000, 0, 0.26],
+    [12000, 50000, 0.26, 0.52],
+    [50000, 85000, 0.52, 0.7],
+    [85000, 100000, 0.7, 0.82],
+    [100000, 1_000_000, 0.82, 1]
+  ];
+
+  for (const [start, end, from, to] of bands) {
+    if (meters <= end) {
+      const t = Math.max(0, Math.min(1, (meters - start) / (end - start)));
+      return from + (to - from) * t;
+    }
+  }
+
+  return 1;
+}
+
+function backgroundProgress(mm) {
+  const meters = mm / 1000;
+  const ground = 1 - clamp01(meters / 3000);
+  const cloud = 1 - clamp01((meters - 1500) / 10500);
+  const sky = 1 - clamp01((meters - 50000) / 50000);
+  const highSky = clamp01((meters - 12000) / 38000) * (1 - clamp01((meters - 85000) / 30000));
+  const space = clamp01((meters - 50000) / 50000);
+  const star = clamp01((meters - 70000) / 30000);
+
+  return {
+    ground,
+    cloud,
+    sky,
+    highSky,
+    space,
+    star,
+    cloudShift: Math.round(Math.min(1800, meters * 0.32))
+  };
+}
+
+function clamp01(value) {
+  return Math.max(0, Math.min(1, value));
 }
 
 function formatLength(mm) {
