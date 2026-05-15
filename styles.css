@@ -63,6 +63,10 @@ button {
   overflow: hidden;
 }
 
+.phone-app[data-screen="gate"] .play-screen {
+  filter: saturate(0.78) brightness(0.92);
+}
+
 .top-bar {
   display: flex;
   align-items: center;
@@ -316,7 +320,7 @@ button {
 }
 
 .phone-app[data-screen="gate"] .action-area {
-  display: none;
+  display: none !important;
 }
 
 .player-label,
@@ -362,9 +366,22 @@ button {
   box-shadow: 2px 2px 0 var(--line);
 }
 
-.gate-card {
+.gate-overlay {
   position: absolute;
-  inset: auto 12px max(12px, env(safe-area-inset-bottom)) 12px;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+  background:
+    linear-gradient(90deg, rgba(36, 25, 18, 0.14) 2px, transparent 2px) 0 0 / 16px 16px,
+    linear-gradient(0deg, rgba(36, 25, 18, 0.12) 2px, transparent 2px) 0 0 / 16px 16px,
+    rgba(36, 25, 18, 0.38);
+}
+
+.gate-card {
+  position: relative;
+  width: min(372px, calc(100vw - 36px));
   border: 4px solid var(--line);
   border-radius: 0;
   background:
@@ -373,15 +390,18 @@ button {
   padding: 14px;
   box-shadow: 8px 8px 0 var(--line);
   transition: transform 220ms ease, opacity 180ms ease;
-  z-index: 30;
-  max-height: calc(100svh - 24px);
+  max-height: calc(100svh - 42px);
   overflow: auto;
   overscroll-behavior: contain;
 }
 
-.phone-app[data-screen="play"] .gate-card {
+.phone-app[data-screen="play"] .gate-overlay {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
+}
+
+.phone-app[data-screen="play"] .gate-card {
   transform: translateY(24px);
 }
 
