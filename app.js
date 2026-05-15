@@ -10,6 +10,7 @@ const hostRole = document.querySelector("#hostRole");
 const nameField = document.querySelector("#nameField");
 const passwordField = document.querySelector("#passwordField");
 const loginForm = document.querySelector("#loginForm");
+const enterButton = document.querySelector("#enterButton");
 const nicknameInput = document.querySelector("#nicknameInput");
 const passwordInput = document.querySelector("#passwordInput");
 const mainClick = document.querySelector("#mainClick");
@@ -98,3 +99,224 @@ async function connectFirebase() {
     remoteDb = {
       ref,
       onValue,
+      runTransaction,
+      set
+    };
+    remoteRef = ref(getDatabase(firebaseApp), config.room || "bureokjam-neck/main");
+    mode = "firebase";
+    syncNote.textContent = "실시간 연결 중...";
+
+    onValue(remoteRef, snapshot => {
+      state = { ...defaultState, ...(snapshot.val() || {}) };
+      syncNote.textContent = "실시간 공유 중";
+      render();
+    });
+  } catch (error) {
+    syncNote.textContent = "Firebase 연결 실패: 설정 확인 필요";
+    console.warn(error);
+  }
+}
+
+function switchRole(role) {
+  selectedRole = role;
+  viewerRole.classList.toggle("active", role === "viewer");
+  hostRole.classList.toggle("active", role === "host");
+  nameField.classList.toggle("hidden", role === "host");
+  passwordField.classList.toggle("hidden", role === "viewer");
+}
+
+function enterApp(event) {
+  event?.preventDefault();
+
+  if (selectedRole === "host") {
+    if (passwordInput.value.trim() !== hostPassword) {
+      shake(loginForm);
+      return;
+    }
+    currentUser = { role: "host", name: HOST_NAME };
+  } else {
+    currentUser = { role: "viewer", name: cleanName(nicknameInput.value) };
+    try {
+      localStorage.setItem("bureokjam-nickname", currentUser.name);
+    } catch {
+      // The name still works for this session.
+    }
+  }
+
+  appRoot.dataset.screen = "play";
+  mainClick.disabled = false;
+  clickVerb.textContent = currentUser.role === "host" ? "목 줄이기" : "목 늘리기";
+  playerLabel.textContent =
+    currentUser.role === "host"
+      ? "부레옼잠 모드: 클릭하면 목이 줄어들어요"
+      : `${currentUser.name}님: 클릭하면 목이 늘어나요`;
+}
+
+function mutateState(mutator) {
+  if (mode === "firebase" && remoteDb && remoteRef) {
+    remoteDb
+      .runTransaction(remoteRef, current => {
+        const base = normalizeGameState({ ...defaultState, ...(current || {}) });
+        return mutator(base);
+      })
+      .catch(error => {
+        syncNote.textContent = "클릭 저장 실패: 새로고침 후 다시 시도";
+        console.warn(error);
+      });
+    return;
+  }
+
+  state = mutator(normalizeGameState({ ...state, users: { ...(state.users || {}) } }));
+  writeLocalState(state);
+  render(true);
+}
+
+function normalizeGameState(current) {
+  if (Number(current.growMm || 0) > 2) {
+    current.growMm = defaultState.growMm;
+  }
+  if (Number(current.shrinkMm || 0) > 4) {
+    current.shrinkMm = defaultState.shrinkMm;
+  }
+  return current;
+}
+
+function clickNeck() {
+  if (!currentUser) return;
+
+  mutateState(current => {
+    const users = { ...(current.users || {}) };
+    const key = currentUser.role === "host" ? HOST_NAME : currentUser.name;
+    const user = users[key] || { clicks: 0, growMm: 0, shrinkMm: 0 };
+
+    if (currentUser.role === "host") {
+      current.neckMm = Math.max(0, Number(current.neckMm || 0) - Number(current.shrinkMm || 0));
+      user.clicks += 1;
+      user.shrinkMm += Number(current.shrinkMm || 0);
+    } else {
+      current.neckMm = Number(current.neckMm || 0) + Number(current.growMm || 0);
+      user.clicks += 1;
+      user.growMm += Number(current.growMm || 0);
+    }
+
+    users[key] = user;
+    current.users = users;
+    current.totalClicks = Number(current.totalClicks || 0) + 1;
+    current.updatedAt = Date.now();
+    return current;
+  });
+
+  popStack();
+}
+
+function render() {
+  state = normalizeGameState(state);
+
+  const mm = Math.max(0, Number(state.neckMm || 0));
+  const displayMm = Math.round(mm * 10) / 10;
+  const height = Math.min(1800, mm * 38);
+  const scale = Math.max(0.36, Math.min(1, 1 - mm / 150));
+  const lengthLabel = formatLength(mm);
+  neckColumn.style.height = `${height}px`;
+  stretchStack.style.setProperty("--stretch-scale", scale.toFixed(3));
+  neckMessage.textContent = `부레옼잠의 목이 ${lengthLabel} 늘어났다!`;
+  rulerValue.textContent = lengthLabel;
+
+  const users = Object.entries(state.users || {}).sort((a, b) => {
+    return Number(b[1].clicks || 0) - Number(a[1].clicks || 0);
+  });
+
+  totalClicks.textContent = Number(state.totalClicks || 0).toLocaleString("ko-KR");
+  topPlayer.textContent = users[0]?.[0] || "-";
+  statsList.innerHTML = "";
+
+  for (const [name, data] of users) {
+    const item = document.createElement("li");
+    item.innerHTML = `
+      <span class="stat-name">${escapeHtml(name)}</span>
+      <span class="stat-clicks">${Number(data.clicks || 0).toLocaleString("ko-KR")}회</span>
+      <span class="stat-mm">+${Number(data.growMm || 0).toLocaleString("ko-KR")} / -${Number(data.shrinkMm || 0).toLocaleString("ko-KR")}mm</span>
+    `;
+    statsList.appendChild(item);
+  }
+
+  if (users.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "empty";
+    empty.textContent = "아직 클릭한 사람이 없어요.";
+    statsList.appendChild(empty);
+  }
+}
+
+function formatLength(mm) {
+  if (mm >= 1_000_000) {
+    return `${formatNumber(mm / 1_000_000)}킬로미터`;
+  }
+  return `${formatNumber(mm / 1000)}미터`;
+}
+
+function formatNumber(value) {
+  const rounded = value >= 100 ? Math.round(value) : value >= 10 ? Math.round(value * 10) / 10 : Math.round(value * 100) / 100;
+  return rounded.toLocaleString("ko-KR", {
+    maximumFractionDigits: 2
+  });
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[char];
+  });
+}
+
+function popStack() {
+  stretchStack.classList.remove("pop");
+  void stretchStack.offsetWidth;
+  stretchStack.classList.add("pop");
+  setTimeout(() => stretchStack.classList.remove("pop"), 220);
+}
+
+function shake(element) {
+  element.classList.remove("shake");
+  void element.offsetWidth;
+  element.classList.add("shake");
+  setTimeout(() => element.classList.remove("shake"), 260);
+}
+
+viewerRole.addEventListener("click", () => switchRole("viewer"));
+hostRole.addEventListener("click", () => switchRole("host"));
+loginForm.addEventListener("submit", enterApp);
+enterButton.addEventListener("click", enterApp);
+document.addEventListener("click", event => {
+  const target = event.target;
+  if (target?.id === "viewerRole") {
+    switchRole("viewer");
+  }
+  if (target?.id === "hostRole") {
+    switchRole("host");
+  }
+  if (target?.id === "enterButton") {
+    enterApp(event);
+  }
+});
+mainClick.addEventListener("click", clickNeck);
+statsButton.addEventListener("click", () => statsModal.showModal());
+closeStats.addEventListener("click", () => statsModal.close());
+statsModal.addEventListener("click", event => {
+  if (event.target === statsModal) {
+    statsModal.close();
+  }
+});
+
+try {
+  nicknameInput.value = localStorage.getItem("bureokjam-nickname") || "";
+} catch {
+  nicknameInput.value = "";
+}
+render();
+connectFirebase();
