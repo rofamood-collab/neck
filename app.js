@@ -36,8 +36,8 @@ let hostPassword = "bureokjam";
 
 const defaultState = {
   neckMm: 0,
-  growMm: 1000,
-  shrinkMm: 2400,
+  growMm: 300,
+  shrinkMm: 720,
   totalClicks: 0,
   users: {},
   updatedAt: Date.now()
@@ -312,7 +312,7 @@ function formatLength(mm) {
 }
 
 function formatNumber(value) {
-  const rounded = value >= 100 ? Math.round(value) : value >= 10 ? Math.round(value * 10) / 10 : Math.round(value * 100) / 100;
+  const rounded = value >= 1000 ? Math.round(value) : value >= 10 ? Math.round(value * 10) / 10 : Math.round(value * 100) / 100;
   return rounded.toLocaleString("ko-KR", {
     maximumFractionDigits: 2
   });
