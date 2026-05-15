@@ -33,8 +33,8 @@ let hostPassword = "bureokjam";
 
 const defaultState = {
   neckMm: 0,
-  growMm: 10,
-  shrinkMm: 24,
+  growMm: 0.5,
+  shrinkMm: 1.2,
   totalClicks: 0,
   users: {},
   updatedAt: Date.now()
@@ -183,11 +183,23 @@ function clickNeck() {
 }
 
 function render() {
-  const mm = Math.max(0, Math.round(Number(state.neckMm || 0)));
-  const height = Math.min(1500, mm * 1.9);
+  if (Number(state.growMm || 0) > 2) {
+    state.growMm = defaultState.growMm;
+  }
+  if (Number(state.shrinkMm || 0) > 4) {
+    state.shrinkMm = defaultState.shrinkMm;
+  }
+
+  const mm = Math.max(0, Number(state.neckMm || 0));
+  const displayMm = Math.round(mm * 10) / 10;
+  const height = Math.min(1800, mm * 38);
+  const scale = Math.max(0.34, Math.min(1, 1 - mm / 120));
+  const lift = Math.min(280, mm * 7);
   neckColumn.style.height = `${height}px`;
-  neckMm.textContent = mm.toLocaleString("ko-KR");
-  rulerValue.textContent = `${mm.toLocaleString("ko-KR")}mm`;
+  stretchStack.style.setProperty("--stretch-scale", scale.toFixed(3));
+  stretchStack.style.setProperty("--stretch-lift", `${lift}px`);
+  neckMm.textContent = displayMm.toLocaleString("ko-KR");
+  rulerValue.textContent = `${displayMm.toLocaleString("ko-KR")}mm`;
 
   const users = Object.entries(state.users || {}).sort((a, b) => {
     return Number(b[1].clicks || 0) - Number(a[1].clicks || 0);
