@@ -14,6 +14,7 @@ const enterButton = document.querySelector("#enterButton");
 const nicknameInput = document.querySelector("#nicknameInput");
 const passwordInput = document.querySelector("#passwordInput");
 const mainClick = document.querySelector("#mainClick");
+const resetButton = document.querySelector("#resetButton");
 const clickVerb = document.querySelector("#clickVerb");
 const playerLabel = document.querySelector("#playerLabel");
 const syncNote = document.querySelector("#syncNote");
@@ -149,6 +150,7 @@ function enterApp(event) {
 
   appRoot.dataset.screen = "play";
   mainClick.disabled = false;
+  resetButton.classList.toggle("hidden", currentUser.role !== "host");
   clickVerb.textContent = currentUser.role === "host" ? "목 줄이기" : "목 늘리기";
   playerLabel.textContent =
     currentUser.role === "host"
@@ -219,6 +221,35 @@ function clickNeck() {
   });
 
   popStack();
+}
+
+function resetGame() {
+  if (currentUser?.role !== "host") {
+    return;
+  }
+
+  const ok = window.confirm("목 길이와 클릭 통계를 처음으로 돌릴까요?");
+  if (!ok) {
+    return;
+  }
+
+  playClickSound("host");
+  mutateState(current => {
+    return {
+      ...defaultState,
+      growMm: current.growMm || defaultState.growMm,
+      shrinkMm: current.shrinkMm || defaultState.shrinkMm,
+      lastEvent: {
+        id: createId(),
+        role: "host",
+        type: "reset",
+        name: HOST_NAME,
+        clientId,
+        at: Date.now()
+      },
+      updatedAt: Date.now()
+    };
+  });
 }
 
 function receiveState(nextState) {
@@ -438,6 +469,7 @@ document.addEventListener("click", event => {
   }
 });
 mainClick.addEventListener("click", clickNeck);
+resetButton.addEventListener("click", resetGame);
 statsButton.addEventListener("click", () => statsModal.showModal());
 closeStats.addEventListener("click", () => statsModal.close());
 statsModal.addEventListener("click", event => {
