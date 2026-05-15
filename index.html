@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>부레옼잠 목늘리기</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="phone-app" data-screen="gate">
+      <section class="play-screen" aria-label="부레옼잠 목늘리기">
+        <header class="top-bar">
+          <button class="icon-button" id="statsButton" type="button" aria-label="통계 보기">
+            <span class="stats-icon" aria-hidden="true"></span>
+          </button>
+          <div class="live-badge">LIVE</div>
+        </header>
+
+        <div class="counter" aria-live="polite">
+          <span id="neckMm">0</span>
+          <small>mm</small>
+        </div>
+
+        <div class="stage">
+          <div class="ruler" aria-hidden="true">
+            <span id="rulerValue">0mm</span>
+          </div>
+
+          <div class="stretch-stack" id="stretchStack">
+            <div class="image-slice head-slice">
+              <img src="./character.png" alt="" />
+            </div>
+            <div class="neck-column" id="neckColumn">
+              <div class="neck-shine"></div>
+            </div>
+            <div class="image-slice body-slice">
+              <img src="./character.png" alt="부레옼잠 캐릭터" />
+            </div>
+          </div>
+        </div>
+
+        <section class="action-area">
+          <p class="player-label" id="playerLabel">입장하면 클릭할 수 있어요</p>
+          <button class="main-click" id="mainClick" type="button" disabled>
+            <span id="clickVerb">목 늘리기</span>
+          </button>
+          <p class="sync-note" id="syncNote">로컬 테스트 모드</p>
+        </section>
+      </section>
+
+      <section class="gate-card" id="gateCard" aria-label="입장하기">
+        <div class="gate-hero">
+          <img src="./character.png" alt="부레옼잠 캐릭터" />
+          <div>
+            <p class="eyebrow">CLICK BATTLE</p>
+            <h1>부레옼잠<br />목늘리기</h1>
+          </div>
+        </div>
+
+        <div class="role-toggle" role="tablist" aria-label="역할 선택">
+          <button class="role active" id="viewerRole" type="button">시청자</button>
+          <button class="role" id="hostRole" type="button">부레옼잠</button>
+        </div>
+
+        <form class="login-form" id="loginForm">
+          <label id="nameField">
+            닉네임
+            <input id="nicknameInput" maxlength="16" placeholder="예: 목늘리기장인" autocomplete="nickname" />
+          </label>
+          <label class="hidden" id="passwordField">
+            비밀번호
+            <input id="passwordInput" type="password" placeholder="방송자 비밀번호" autocomplete="current-password" />
+          </label>
+          <button class="enter-button" type="submit">입장하기</button>
+        </form>
+      </section>
+
+      <dialog class="stats-modal" id="statsModal">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">STATS</p>
+            <h2>클릭 통계</h2>
+          </div>
+          <button class="icon-button close" id="closeStats" type="button" aria-label="닫기">×</button>
+        </div>
+        <div class="stats-summary">
+          <div>
+            <span id="totalClicks">0</span>
+            <small>전체 클릭</small>
+          </div>
+          <div>
+            <span id="topPlayer">-</span>
+            <small>최다 클릭</small>
+          </div>
+        </div>
+        <ol class="stats-list" id="statsList"></ol>
+      </dialog>
+    </main>
+
+    <script src="./firebase-config.js"></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
