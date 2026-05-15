@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>부레옼잠 목늘리기</title>
-    <link rel="stylesheet" href="./styles.css?v=20260515-icon-style" />
+    <link rel="stylesheet" href="./styles.css?v=20260515-presence-count" />
   </head>
   <body>
     <main class="phone-app" data-screen="gate">
@@ -13,6 +13,10 @@
           <button class="icon-button" id="statsButton" type="button" aria-label="통계 보기">
             <span class="stats-icon" aria-hidden="true"></span>
           </button>
+          <div class="live-counts" aria-live="polite">
+            <span>접속 <b id="onlineCount">0</b></span>
+            <span>클릭 <b id="activeClickerCount">0</b></span>
+          </div>
           <div class="live-badge">LIVE</div>
         </header>
 
@@ -101,7 +105,7 @@
       </dialog>
     </main>
 
-    <script src="./firebase-config.js?v=20260515-icon-style"></script>
-    <script src="./app.js?v=20260515-icon-style"></script>
+    <script src="./firebase-config.js?v=20260515-presence-count"></script>
+    <script src="./app.js?v=20260515-presence-count"></script>
   </body>
 </html>
