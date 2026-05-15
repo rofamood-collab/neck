@@ -49,31 +49,33 @@
         </section>
       </section>
 
-      <section class="gate-card" id="gateCard" aria-label="입장하기">
-        <div class="gate-hero">
-          <img src="./character.png" alt="부레옼잠 캐릭터" />
-          <div>
-            <p class="eyebrow">CLICK BATTLE</p>
-            <h1>부레옼잠<br />목늘리기</h1>
+      <section class="gate-overlay" id="gateOverlay" aria-label="입장하기">
+        <div class="gate-card" id="gateCard">
+          <div class="gate-hero">
+            <img src="./character.png" alt="부레옼잠 캐릭터" />
+            <div>
+              <p class="eyebrow">CLICK BATTLE</p>
+              <h1>부레옼잠<br />목늘리기</h1>
+            </div>
           </div>
-        </div>
 
-        <div class="role-toggle" role="tablist" aria-label="역할 선택">
-          <button class="role active" id="viewerRole" type="button">시청자</button>
-          <button class="role" id="hostRole" type="button">부레옼잠</button>
-        </div>
+          <div class="role-toggle" role="tablist" aria-label="역할 선택">
+            <button class="role active" id="viewerRole" type="button">시청자</button>
+            <button class="role" id="hostRole" type="button">부레옼잠</button>
+          </div>
 
-        <form class="login-form" id="loginForm">
-          <label id="nameField">
-            닉네임
-            <input id="nicknameInput" maxlength="16" placeholder="예: 목늘리기장인" autocomplete="nickname" />
-          </label>
-          <label class="hidden" id="passwordField">
-            비밀번호
-            <input id="passwordInput" type="password" placeholder="방송자 비밀번호" autocomplete="current-password" />
-          </label>
-          <button class="enter-button" type="submit">입장하기</button>
-        </form>
+          <form class="login-form" id="loginForm">
+            <label id="nameField">
+              닉네임
+              <input id="nicknameInput" maxlength="16" placeholder="예: 목늘리기장인" autocomplete="nickname" />
+            </label>
+            <label class="hidden" id="passwordField">
+              비밀번호
+              <input id="passwordInput" type="password" placeholder="방송자 비밀번호" autocomplete="current-password" />
+            </label>
+            <button class="enter-button" type="submit">입장하기</button>
+          </form>
+        </div>
       </section>
 
       <dialog class="stats-modal" id="statsModal">
