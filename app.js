@@ -440,9 +440,12 @@ function escapeHtml(value) {
 
 function popStack() {
   stretchStack.classList.remove("pop");
+  stage.classList.remove("speed-lines");
   void stretchStack.offsetWidth;
   stretchStack.classList.add("pop");
+  stage.classList.add("speed-lines");
   setTimeout(() => stretchStack.classList.remove("pop"), 220);
+  setTimeout(() => stage.classList.remove("speed-lines"), 280);
 }
 
 function shake(element) {
