@@ -35,8 +35,8 @@ let hostPassword = "bureokjam";
 
 const defaultState = {
   neckMm: 0,
-  growMm: 5,
-  shrinkMm: 12,
+  growMm: 10,
+  shrinkMm: 24,
   totalClicks: 0,
   users: {},
   updatedAt: Date.now()
