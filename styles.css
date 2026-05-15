@@ -1,14 +1,15 @@
 :root {
   --ink: #241912;
-  --muted: #79695d;
-  --paper: #fff8dc;
+  --muted: #7b6654;
+  --paper: #fff4c8;
   --line: #241912;
   --yellow: #ffd51e;
   --red: #ef382f;
   --blue: #2377ff;
   --green: #159d63;
   --skin: #ffd2bd;
-  --shadow: rgba(36, 25, 18, 0.2);
+  --shadow: rgba(36, 25, 18, 0.22);
+  --pixel-shadow: 4px 0 0 var(--line), -4px 0 0 var(--line), 0 4px 0 var(--line), 0 -4px 0 var(--line);
 }
 
 * {
@@ -28,7 +29,8 @@ body {
     linear-gradient(135deg, rgba(255, 255, 255, 0.44) 0 18%, transparent 18% 100%),
     linear-gradient(165deg, #f6c538 0%, #f18c50 48%, #76c7ea 100%);
   color: var(--ink);
-  font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+  font-family: "Courier New", "DungGeunMo", "Galmuri11", "Malgun Gothic", monospace;
+  image-rendering: pixelated;
 }
 
 button,
@@ -47,9 +49,10 @@ button {
   margin: 0 auto;
   overflow: hidden;
   background:
-    repeating-linear-gradient(-14deg, rgba(255, 255, 255, 0.24) 0 18px, transparent 18px 36px),
-    linear-gradient(180deg, #fff0a7 0%, #f7b455 58%, #8ad2ee 100%);
-  box-shadow: 0 0 0 1px rgba(36, 25, 18, 0.08), 0 20px 70px rgba(36, 25, 18, 0.22);
+    linear-gradient(90deg, rgba(36, 25, 18, 0.06) 2px, transparent 2px) 0 0 / 16px 16px,
+    linear-gradient(0deg, rgba(36, 25, 18, 0.05) 2px, transparent 2px) 0 0 / 16px 16px,
+    linear-gradient(180deg, #ffe57b 0%, #f7a64d 58%, #72c8e6 100%);
+  box-shadow: 0 0 0 4px var(--line), 0 20px 70px rgba(36, 25, 18, 0.22);
 }
 
 .play-screen {
@@ -71,14 +74,14 @@ button {
   width: 44px;
   height: 44px;
   border: 3px solid var(--line);
-  border-radius: 8px;
-  background: var(--paper);
+  border-radius: 0;
+  background: #fffaf0;
   color: var(--ink);
   display: grid;
   place-items: center;
   font-size: 28px;
   font-weight: 1000;
-  box-shadow: 4px 4px 0 var(--shadow);
+  box-shadow: 4px 4px 0 var(--line);
   cursor: pointer;
 }
 
@@ -95,31 +98,46 @@ button {
 
 .live-badge {
   border: 3px solid var(--line);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--red);
   color: white;
   padding: 6px 12px;
   font-size: 13px;
   font-weight: 1000;
-  box-shadow: 4px 4px 0 var(--shadow);
+  box-shadow: 4px 4px 0 var(--line);
 }
 
 .counter {
   justify-self: center;
-  min-width: 150px;
-  margin-top: 2px;
-  border: 3px solid var(--line);
-  border-radius: 8px;
-  background: var(--yellow);
-  padding: 8px 14px 9px;
+  width: min(360px, calc(100vw - 72px));
+  margin-top: 6px;
+  border: 4px solid var(--line);
+  border-radius: 0;
+  background: #fffaf0;
+  padding: 12px 14px;
   text-align: center;
-  box-shadow: 5px 5px 0 var(--shadow);
+  box-shadow: 6px 6px 0 var(--line);
+  position: relative;
+}
+
+.counter::after {
+  content: "";
+  position: absolute;
+  left: 38px;
+  bottom: -15px;
+  width: 18px;
+  height: 18px;
+  background: #fffaf0;
+  border-right: 4px solid var(--line);
+  border-bottom: 4px solid var(--line);
 }
 
 .counter span {
-  font-size: 36px;
-  line-height: 1;
+  display: block;
+  font-size: clamp(15px, 4.6vw, 20px);
+  line-height: 1.28;
   font-weight: 1000;
+  word-break: keep-all;
 }
 
 .counter small {
@@ -143,8 +161,8 @@ button {
   left: 12px;
   bottom: 18px;
   top: 36px;
-  width: 4px;
-  border-radius: 999px;
+  width: 5px;
+  border-radius: 0;
   background: var(--line);
   opacity: 0.9;
 }
@@ -155,7 +173,7 @@ button {
   position: absolute;
   left: 0;
   width: 42px;
-  height: 4px;
+  height: 5px;
   background: var(--line);
 }
 
@@ -173,8 +191,8 @@ button {
   left: 13px;
   min-width: 86px;
   border: 3px solid var(--line);
-  border-radius: 8px;
-  background: white;
+  border-radius: 0;
+  background: #fffaf0;
   padding: 5px 8px;
   font-size: 13px;
   font-weight: 1000;
@@ -186,8 +204,8 @@ button {
   --stretch-lift: 0px;
   --img-w: calc(106px * var(--scale));
   --img-h: calc(222px * var(--scale));
-  --head-h: calc(92px * var(--scale));
-  --body-h: calc(130px * var(--scale));
+  --head-h: calc(97px * var(--scale));
+  --body-h: calc(125px * var(--scale));
   width: var(--img-w);
   max-height: 100%;
   display: flex;
@@ -209,6 +227,7 @@ button {
   flex: 0 0 auto;
   overflow: hidden;
   z-index: 2;
+  image-rendering: pixelated;
 }
 
 .image-slice img {
@@ -218,6 +237,8 @@ button {
   height: var(--img-h);
   pointer-events: none;
   user-select: none;
+  image-rendering: pixelated;
+  filter: saturate(1.12) contrast(1.05);
 }
 
 .head-slice {
@@ -242,32 +263,35 @@ button {
   height: 0;
   min-height: 0;
   margin-top: calc(-3px * var(--scale));
-  margin-bottom: calc(-1px * var(--scale));
-  border-left: 3px solid rgba(93, 48, 34, 0.62);
-  border-right: 3px solid rgba(93, 48, 34, 0.62);
+  margin-bottom: calc(-6px * var(--scale));
+  border-left: 4px solid #5d3022;
+  border-right: 4px solid #5d3022;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.14) 0 16px, transparent 16px 32px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0 10px, transparent 10px 100%),
+    repeating-linear-gradient(0deg, rgba(116, 61, 42, 0.16) 0 12px, transparent 12px 24px),
     var(--skin);
   transition: height 220ms cubic-bezier(0.18, 0.9, 0.18, 1);
   z-index: 1;
 }
 
-.neck-column::before,
-.neck-column::after {
-  content: "";
+.neck-cap {
   position: absolute;
-  left: -16px;
-  right: -16px;
-  height: 3px;
-  background: rgba(36, 25, 18, 0.36);
+  left: -8px;
+  right: -8px;
+  height: 12px;
+  background: var(--skin);
+  border: 4px solid #5d3022;
+  z-index: 3;
 }
 
-.neck-column::before {
-  top: 0;
+.top-cap {
+  top: -4px;
+  border-bottom: 0;
 }
 
-.neck-column::after {
-  bottom: 0;
+.bottom-cap {
+  bottom: -4px;
+  border-top: 0;
 }
 
 .neck-shine {
@@ -285,8 +309,14 @@ button {
   display: grid;
   gap: 9px;
   border-top: 4px solid var(--line);
-  background: rgba(255, 248, 220, 0.97);
-  box-shadow: 0 -10px 24px rgba(36, 25, 18, 0.16);
+  background:
+    linear-gradient(90deg, rgba(36, 25, 18, 0.05) 2px, transparent 2px) 0 0 / 14px 14px,
+    #fff1bd;
+  box-shadow: 0 -6px 0 rgba(36, 25, 18, 0.18);
+}
+
+.phone-app[data-screen="gate"] .action-area {
+  display: none;
 }
 
 .player-label,
@@ -309,12 +339,12 @@ button {
 .main-click {
   min-height: 76px;
   border: 4px solid var(--line);
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--red);
   color: white;
   font-size: 28px;
   font-weight: 1000;
-  box-shadow: 6px 6px 0 var(--shadow);
+  box-shadow: 6px 6px 0 var(--line);
   cursor: pointer;
 }
 
@@ -329,19 +359,24 @@ button {
 .enter-button:active,
 .role:active {
   transform: translate(3px, 3px);
-  box-shadow: 2px 2px 0 var(--shadow);
+  box-shadow: 2px 2px 0 var(--line);
 }
 
 .gate-card {
   position: absolute;
   inset: auto 12px max(12px, env(safe-area-inset-bottom)) 12px;
   border: 4px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255, 248, 220, 0.97);
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgba(36, 25, 18, 0.05) 2px, transparent 2px) 0 0 / 14px 14px,
+    #fff1bd;
   padding: 14px;
-  box-shadow: 8px 8px 0 var(--shadow);
+  box-shadow: 8px 8px 0 var(--line);
   transition: transform 220ms ease, opacity 180ms ease;
-  z-index: 5;
+  z-index: 30;
+  max-height: calc(100svh - 24px);
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .phone-app[data-screen="play"] .gate-card {
@@ -363,8 +398,9 @@ button {
   object-fit: cover;
   object-position: top center;
   border: 3px solid var(--line);
-  border-radius: 10px;
+  border-radius: 0;
   background: white;
+  image-rendering: pixelated;
 }
 
 .eyebrow {
@@ -395,14 +431,15 @@ h2 {
   grid-template-columns: 1fr 1fr;
   margin-top: 14px;
   border: 3px solid var(--line);
-  border-radius: 10px;
+  border-radius: 0;
   overflow: hidden;
+  box-shadow: 4px 4px 0 var(--line);
 }
 
 .role {
   min-height: 48px;
   border: 0;
-  background: white;
+  background: #fffaf0;
   color: var(--ink);
   font-weight: 1000;
   cursor: pointer;
@@ -426,7 +463,7 @@ h2 {
 label {
   display: grid;
   gap: 6px;
-  color: var(--muted);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 1000;
 }
@@ -435,8 +472,8 @@ input {
   width: 100%;
   min-height: 48px;
   border: 3px solid var(--line);
-  border-radius: 10px;
-  background: white;
+  border-radius: 0;
+  background: #fffaf0;
   color: var(--ink);
   padding: 0 12px;
   outline: none;
@@ -445,18 +482,18 @@ input {
 }
 
 input:focus {
-  box-shadow: 0 0 0 4px rgba(35, 119, 255, 0.23);
+  box-shadow: 4px 4px 0 var(--blue);
 }
 
 .enter-button {
   min-height: 54px;
   border: 3px solid var(--line);
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--green);
   color: white;
   font-size: 19px;
   font-weight: 1000;
-  box-shadow: 5px 5px 0 var(--shadow);
+  box-shadow: 5px 5px 0 var(--line);
   cursor: pointer;
 }
 
@@ -485,11 +522,13 @@ input:focus {
   width: min(390px, calc(100vw - 28px));
   max-height: min(78svh, 680px);
   border: 4px solid var(--line);
-  border-radius: 14px;
-  background: var(--paper);
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgba(36, 25, 18, 0.05) 2px, transparent 2px) 0 0 / 14px 14px,
+    var(--paper);
   color: var(--ink);
   padding: 14px;
-  box-shadow: 8px 8px 0 var(--shadow);
+  box-shadow: 8px 8px 0 var(--line);
 }
 
 .stats-modal::backdrop {
@@ -517,8 +556,8 @@ input:focus {
 
 .stats-summary div {
   border: 3px solid var(--line);
-  border-radius: 10px;
-  background: white;
+  border-radius: 0;
+  background: #fffaf0;
   padding: 10px;
 }
 
@@ -551,9 +590,9 @@ input:focus {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 4px 10px;
-  border: 3px solid rgba(36, 25, 18, 0.28);
-  border-radius: 10px;
-  background: white;
+  border: 3px solid var(--line);
+  border-radius: 0;
+  background: #fffaf0;
   padding: 9px 10px;
   align-items: center;
 }
