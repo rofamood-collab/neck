@@ -18,7 +18,7 @@ const playerLabel = document.querySelector("#playerLabel");
 const syncNote = document.querySelector("#syncNote");
 const neckColumn = document.querySelector("#neckColumn");
 const stretchStack = document.querySelector("#stretchStack");
-const neckMm = document.querySelector("#neckMm");
+const neckMessage = document.querySelector("#neckMessage");
 const rulerValue = document.querySelector("#rulerValue");
 const totalClicks = document.querySelector("#totalClicks");
 const topPlayer = document.querySelector("#topPlayer");
@@ -41,6 +41,7 @@ const defaultState = {
 };
 
 let state = readLocalState();
+const channel = createChannel();
 
 function cleanName(value) {
   return String(value || "").trim().slice(0, 16) || "익명의 시청자";
@@ -55,17 +56,28 @@ function readLocalState() {
 }
 
 function writeLocalState(nextState) {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(nextState));
-  channel.postMessage(nextState);
+  try {
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(nextState));
+  } catch {
+    // Private or file preview modes can block localStorage.
+  }
+  channel?.postMessage(nextState);
 }
 
-const channel = new BroadcastChannel("bureokjam-neck");
-channel.onmessage = event => {
-  if (mode === "local") {
-    state = event.data;
-    render();
+function createChannel() {
+  try {
+    const nextChannel = new BroadcastChannel("bureokjam-neck");
+    nextChannel.onmessage = event => {
+      if (mode === "local") {
+        state = event.data;
+        render();
+      }
+    };
+    return nextChannel;
+  } catch {
+    return null;
   }
-};
+}
 
 async function connectFirebase() {
   const config = window.BUREOKJAM_FIREBASE_CONFIG;
@@ -86,185 +98,3 @@ async function connectFirebase() {
     remoteDb = {
       ref,
       onValue,
-      runTransaction,
-      set
-    };
-    remoteRef = ref(getDatabase(firebaseApp), config.room || "bureokjam-neck/main");
-    mode = "firebase";
-    syncNote.textContent = "실시간 연결 중...";
-
-    onValue(remoteRef, snapshot => {
-      state = { ...defaultState, ...(snapshot.val() || {}) };
-      syncNote.textContent = "실시간 공유 중";
-      render();
-    });
-  } catch (error) {
-    syncNote.textContent = "Firebase 연결 실패: 설정 확인 필요";
-    console.warn(error);
-  }
-}
-
-function switchRole(role) {
-  selectedRole = role;
-  viewerRole.classList.toggle("active", role === "viewer");
-  hostRole.classList.toggle("active", role === "host");
-  nameField.classList.toggle("hidden", role === "host");
-  passwordField.classList.toggle("hidden", role === "viewer");
-}
-
-function enterApp(event) {
-  event.preventDefault();
-
-  if (selectedRole === "host") {
-    if (passwordInput.value.trim() !== hostPassword) {
-      shake(loginForm);
-      return;
-    }
-    currentUser = { role: "host", name: HOST_NAME };
-  } else {
-    currentUser = { role: "viewer", name: cleanName(nicknameInput.value) };
-    localStorage.setItem("bureokjam-nickname", currentUser.name);
-  }
-
-  appRoot.dataset.screen = "play";
-  mainClick.disabled = false;
-  clickVerb.textContent = currentUser.role === "host" ? "목 줄이기" : "목 늘리기";
-  playerLabel.textContent =
-    currentUser.role === "host"
-      ? "부레옼잠 모드: 클릭하면 목이 줄어들어요"
-      : `${currentUser.name}님: 클릭하면 목이 늘어나요`;
-}
-
-function mutateState(mutator) {
-  if (mode === "firebase" && remoteDb && remoteRef) {
-    remoteDb
-      .runTransaction(remoteRef, current => {
-        const base = { ...defaultState, ...(current || {}) };
-        return mutator(base);
-      })
-      .catch(error => {
-        syncNote.textContent = "클릭 저장 실패: 새로고침 후 다시 시도";
-        console.warn(error);
-      });
-    return;
-  }
-
-  state = mutator({ ...state, users: { ...(state.users || {}) } });
-  writeLocalState(state);
-  render(true);
-}
-
-function clickNeck() {
-  if (!currentUser) return;
-
-  mutateState(current => {
-    const users = { ...(current.users || {}) };
-    const key = currentUser.role === "host" ? HOST_NAME : currentUser.name;
-    const user = users[key] || { clicks: 0, growMm: 0, shrinkMm: 0 };
-
-    if (currentUser.role === "host") {
-      current.neckMm = Math.max(0, Number(current.neckMm || 0) - Number(current.shrinkMm || 0));
-      user.clicks += 1;
-      user.shrinkMm += Number(current.shrinkMm || 0);
-    } else {
-      current.neckMm = Number(current.neckMm || 0) + Number(current.growMm || 0);
-      user.clicks += 1;
-      user.growMm += Number(current.growMm || 0);
-    }
-
-    users[key] = user;
-    current.users = users;
-    current.totalClicks = Number(current.totalClicks || 0) + 1;
-    current.updatedAt = Date.now();
-    return current;
-  });
-
-  popStack();
-}
-
-function render() {
-  if (Number(state.growMm || 0) > 2) {
-    state.growMm = defaultState.growMm;
-  }
-  if (Number(state.shrinkMm || 0) > 4) {
-    state.shrinkMm = defaultState.shrinkMm;
-  }
-
-  const mm = Math.max(0, Number(state.neckMm || 0));
-  const displayMm = Math.round(mm * 10) / 10;
-  const height = Math.min(1800, mm * 38);
-  const scale = Math.max(0.34, Math.min(1, 1 - mm / 120));
-  const lift = Math.min(280, mm * 7);
-  neckColumn.style.height = `${height}px`;
-  stretchStack.style.setProperty("--stretch-scale", scale.toFixed(3));
-  stretchStack.style.setProperty("--stretch-lift", `${lift}px`);
-  neckMm.textContent = displayMm.toLocaleString("ko-KR");
-  rulerValue.textContent = `${displayMm.toLocaleString("ko-KR")}mm`;
-
-  const users = Object.entries(state.users || {}).sort((a, b) => {
-    return Number(b[1].clicks || 0) - Number(a[1].clicks || 0);
-  });
-
-  totalClicks.textContent = Number(state.totalClicks || 0).toLocaleString("ko-KR");
-  topPlayer.textContent = users[0]?.[0] || "-";
-  statsList.innerHTML = "";
-
-  for (const [name, data] of users) {
-    const item = document.createElement("li");
-    item.innerHTML = `
-      <span class="stat-name">${escapeHtml(name)}</span>
-      <span class="stat-clicks">${Number(data.clicks || 0).toLocaleString("ko-KR")}회</span>
-      <span class="stat-mm">+${Number(data.growMm || 0).toLocaleString("ko-KR")} / -${Number(data.shrinkMm || 0).toLocaleString("ko-KR")}mm</span>
-    `;
-    statsList.appendChild(item);
-  }
-
-  if (users.length === 0) {
-    const empty = document.createElement("li");
-    empty.className = "empty";
-    empty.textContent = "아직 클릭한 사람이 없어요.";
-    statsList.appendChild(empty);
-  }
-}
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, char => {
-    return {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    }[char];
-  });
-}
-
-function popStack() {
-  stretchStack.classList.remove("pop");
-  void stretchStack.offsetWidth;
-  stretchStack.classList.add("pop");
-  setTimeout(() => stretchStack.classList.remove("pop"), 220);
-}
-
-function shake(element) {
-  element.classList.remove("shake");
-  void element.offsetWidth;
-  element.classList.add("shake");
-  setTimeout(() => element.classList.remove("shake"), 260);
-}
-
-viewerRole.addEventListener("click", () => switchRole("viewer"));
-hostRole.addEventListener("click", () => switchRole("host"));
-loginForm.addEventListener("submit", enterApp);
-mainClick.addEventListener("click", clickNeck);
-statsButton.addEventListener("click", () => statsModal.showModal());
-closeStats.addEventListener("click", () => statsModal.close());
-statsModal.addEventListener("click", event => {
-  if (event.target === statsModal) {
-    statsModal.close();
-  }
-});
-
-nicknameInput.value = localStorage.getItem("bureokjam-nickname") || "";
-render();
-connectFirebase();
