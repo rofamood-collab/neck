@@ -203,25 +203,25 @@ button {
 }
 
 .stretch-stack {
-  --scale: 0.9;
-  --stretch-scale: 1;
+  --scale: 1.08;
   --img-w: calc(288px * var(--scale));
   --img-h: calc(572px * var(--scale));
-  --head-h: calc(250px * var(--scale));
-  --body-h: calc(322px * var(--scale));
+  --head-h: calc(238px * var(--scale));
+  --body-h: calc(334px * var(--scale));
   width: var(--img-w);
   max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   transform-origin: bottom center;
-  transform: scale(var(--stretch-scale));
+  transform: none !important;
   transition: transform 160ms ease;
   will-change: transform;
+  margin-bottom: -2px;
 }
 
 .stretch-stack.pop {
-  transform: translateY(-5px) scale(calc(var(--stretch-scale) * 1.018));
+  transform: translateY(-5px);
 }
 
 .image-slice {
@@ -266,7 +266,7 @@ button {
   height: 0;
   min-height: 0;
   margin-top: calc(-6px * var(--scale));
-  margin-bottom: calc(-12px * var(--scale));
+  margin-bottom: calc(-8px * var(--scale));
   border-left: 4px solid #5d3022;
   border-right: 4px solid #5d3022;
   background:
@@ -644,7 +644,7 @@ input:focus {
 
 @media (min-aspect-ratio: 9 / 16) and (max-height: 740px) {
   .stretch-stack {
-    --scale: 0.78;
+    --scale: 1.08;
   }
 
   .main-click {
@@ -654,7 +654,7 @@ input:focus {
 
 @media (max-width: 360px) {
   .stretch-stack {
-    --scale: 0.76;
+    --scale: 1.02;
   }
 
   h1 {
