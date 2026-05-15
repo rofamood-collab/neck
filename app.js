@@ -1,5 +1,6 @@
 const HOST_NAME = "부레옼잠";
 const LOCAL_KEY = "bureokjam-neck-state";
+const VOLUME_KEY = "bureokjam-neck-volume";
 
 const appRoot = document.querySelector(".phone-app");
 const statsButton = document.querySelector("#statsButton");
@@ -15,6 +16,8 @@ const nicknameInput = document.querySelector("#nicknameInput");
 const passwordInput = document.querySelector("#passwordInput");
 const mainClick = document.querySelector("#mainClick");
 const resetButton = document.querySelector("#resetButton");
+const volumeSlider = document.querySelector("#volumeSlider");
+const volumeValue = document.querySelector("#volumeValue");
 const clickVerb = document.querySelector("#clickVerb");
 const playerLabel = document.querySelector("#playerLabel");
 const syncNote = document.querySelector("#syncNote");
@@ -29,6 +32,7 @@ const statsList = document.querySelector("#statsList");
 const onlineCount = document.querySelector("#onlineCount");
 const activeClickerCount = document.querySelector("#activeClickerCount");
 let audioContext = null;
+let soundVolume = readVolume();
 const clientId = createId();
 let lastSoundEventId = null;
 let presenceTimer = null;
@@ -73,6 +77,26 @@ function writeLocalState(nextState) {
     // Private or file preview modes can block localStorage.
   }
   channel?.postMessage(nextState);
+}
+
+function readVolume() {
+  try {
+    const value = Number(localStorage.getItem(VOLUME_KEY));
+    return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.35;
+  } catch {
+    return 0.35;
+  }
+}
+
+function setVolume(value) {
+  soundVolume = Math.max(0, Math.min(1, Number(value) / 100));
+  volumeSlider.value = String(Math.round(soundVolume * 100));
+  volumeValue.textContent = String(Math.round(soundVolume * 100));
+  try {
+    localStorage.setItem(VOLUME_KEY, String(soundVolume));
+  } catch {
+    // Volume still works for this session.
+  }
 }
 
 function createChannel() {
@@ -462,7 +486,7 @@ function playClickSound(role) {
     oscillator.frequency.setValueAtTime(role === "host" ? 220 : 660, now);
     oscillator.frequency.exponentialRampToValueAtTime(role === "host" ? 120 : 990, now + 0.08);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.16, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.16 * soundVolume, now + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
@@ -534,6 +558,7 @@ document.addEventListener("click", event => {
 });
 mainClick.addEventListener("click", clickNeck);
 resetButton.addEventListener("click", resetGame);
+volumeSlider.addEventListener("input", () => setVolume(volumeSlider.value));
 statsButton.addEventListener("click", () => statsModal.showModal());
 closeStats.addEventListener("click", () => statsModal.close());
 statsModal.addEventListener("click", event => {
@@ -548,4 +573,5 @@ try {
   nicknameInput.value = "";
 }
 render();
+setVolume(soundVolume * 100);
 connectFirebase();
