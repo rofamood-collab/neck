@@ -189,6 +189,24 @@ button {
   display: none;
 }
 
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: -20px -16px;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(90deg, transparent 0 7%, rgba(255, 255, 255, 0.9) 7% 9%, transparent 9% 16%) 0 0 / 74px 100%,
+    linear-gradient(90deg, transparent 0 18%, rgba(36, 25, 18, 0.42) 18% 20%, transparent 20% 31%) 0 0 / 92px 100%,
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(255, 255, 255, 0.34) 18px 21px, transparent 21px 46px);
+  mix-blend-mode: screen;
+}
+
+.stage.speed-lines::after {
+  animation: speed-lines 260ms steps(3, end);
+}
+
 .ruler {
   position: absolute;
   left: 12px;
@@ -598,6 +616,20 @@ input:focus {
   }
   100% {
     filter: brightness(1);
+  }
+}
+
+@keyframes speed-lines {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.78);
+  }
+  18% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1.18);
   }
 }
 
