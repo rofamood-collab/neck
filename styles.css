@@ -45,11 +45,16 @@ button {
 .phone-app {
   --altitude: 0;
   --ground-alpha: 1;
+  --city-alpha: 1;
+  --sun-alpha: 1;
   --cloud-alpha: 1;
+  --cloud-scene-alpha: 0;
   --sky-alpha: 1;
   --high-sky-alpha: 0;
+  --strato-alpha: 0;
   --space-alpha: 0;
   --star-alpha: 0;
+  --nebula-alpha: 0;
   --cloud-shift: 0px;
   position: relative;
   width: min(100vw, 430px);
@@ -57,28 +62,68 @@ button {
   margin: 0 auto;
   overflow: hidden;
   background:
-    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, var(--star-alpha)) 0 2px, transparent 3px) 0 0 / 116px 142px,
-    radial-gradient(circle at 72% 28%, rgba(255, 255, 255, var(--star-alpha)) 0 2px, transparent 3px) 0 0 / 168px 132px,
-    radial-gradient(circle at 44% 38%, rgba(255, 255, 255, calc(var(--star-alpha) * 0.75)) 0 1px, transparent 2px) 0 0 / 142px 166px,
-    linear-gradient(90deg, transparent 0 8%, rgba(255, 255, 255, calc(var(--cloud-alpha) * 0.86)) 8% 10%, transparent 10% 17%) 0 var(--cloud-shift) / 86px 100%,
-    linear-gradient(90deg, transparent 0 18%, rgba(255, 156, 0, calc(var(--cloud-alpha) * 0.55)) 18% 21%, transparent 21% 32%) 0 var(--cloud-shift) / 118px 100%,
-    radial-gradient(circle at 30% 32%, rgba(255, 255, 255, calc(var(--cloud-alpha) * 0.9)) 0 7px, transparent 8px),
-    radial-gradient(circle at 73% 42%, rgba(255, 255, 255, calc(var(--cloud-alpha) * 0.72)) 0 9px, transparent 10px),
+    linear-gradient(90deg, transparent 0 10%, rgba(255, 255, 255, calc(var(--star-alpha) * 0.95)) 10% 11%, transparent 11% 24%) 0 0 / 88px 100%,
+    linear-gradient(90deg, transparent 0 6%, rgba(255, 214, 75, calc(var(--star-alpha) * 0.9)) 6% 7%, transparent 7% 18%) 0 0 / 116px 100%,
+    radial-gradient(circle at 70% 16%, rgba(245, 119, 170, calc(var(--nebula-alpha) * 0.72)) 0 18px, transparent 19px),
+    radial-gradient(circle at 34% 24%, rgba(83, 195, 255, calc(var(--nebula-alpha) * 0.48)) 0 28px, transparent 29px),
+    linear-gradient(135deg, transparent 0 34%, rgba(138, 73, 199, calc(var(--nebula-alpha) * 0.42)) 34% 37%, transparent 37% 100%),
+    linear-gradient(90deg, transparent 0 8%, rgba(255, 255, 255, calc(var(--cloud-scene-alpha) * 0.95)) 8% 21%, transparent 21% 100%) 0 var(--cloud-shift) / 180px 76px,
+    linear-gradient(90deg, transparent 0 34%, rgba(209, 239, 250, calc(var(--cloud-scene-alpha) * 0.78)) 34% 56%, transparent 56% 100%) 0 var(--cloud-shift) / 230px 92px,
+    linear-gradient(135deg, transparent 0 34%, rgba(232, 250, 255, calc(var(--cloud-scene-alpha) * 0.9)) 34% 48%, transparent 48% 100%),
+    linear-gradient(225deg, transparent 0 42%, rgba(238, 252, 255, calc(var(--cloud-scene-alpha) * 0.78)) 42% 55%, transparent 55% 100%),
+    linear-gradient(90deg, transparent 0 8%, rgba(255, 255, 255, calc(var(--cloud-alpha) * 0.75)) 8% 10%, transparent 10% 17%) 0 var(--cloud-shift) / 86px 100%,
+    linear-gradient(90deg, transparent 0 18%, rgba(255, 156, 0, calc(var(--cloud-alpha) * 0.46)) 18% 21%, transparent 21% 32%) 0 var(--cloud-shift) / 118px 100%,
+    radial-gradient(circle at 63% 26%, rgba(255, 248, 196, calc(var(--sun-alpha) * 0.92)) 0 42px, transparent 43px),
+    linear-gradient(180deg, transparent 0 72%, rgba(40, 53, 74, calc(var(--city-alpha) * 0.95)) 72% 100%),
+    linear-gradient(90deg, rgba(31, 43, 59, calc(var(--city-alpha) * 0.98)) 0 12%, transparent 12% 17%, rgba(38, 47, 66, calc(var(--city-alpha) * 0.92)) 17% 29%, transparent 29% 35%, rgba(28, 37, 53, calc(var(--city-alpha) * 0.98)) 35% 48%, transparent 48% 56%, rgba(45, 54, 72, calc(var(--city-alpha) * 0.88)) 56% 70%, transparent 70% 75%, rgba(27, 38, 55, calc(var(--city-alpha) * 0.96)) 75% 100%) 0 100% / 170px 28% repeat-x,
     linear-gradient(135deg, transparent 0 58%, rgba(93, 129, 61, calc(var(--ground-alpha) * 0.72)) 58% 69%, transparent 69%),
-    radial-gradient(circle at 24% calc(89% + var(--cloud-shift)), rgba(36, 116, 48, calc(var(--ground-alpha) * 0.82)) 0 26px, transparent 27px),
-    radial-gradient(circle at 68% calc(86% + var(--cloud-shift)), rgba(44, 137, 56, calc(var(--ground-alpha) * 0.7)) 0 34px, transparent 35px),
     linear-gradient(90deg, rgba(36, 25, 18, 0.055) 2px, transparent 2px) 0 0 / 16px 16px,
     linear-gradient(0deg, rgba(36, 25, 18, 0.045) 2px, transparent 2px) 0 0 / 16px 16px,
     linear-gradient(180deg,
       rgba(4, 7, 26, var(--space-alpha)) 0%,
-      rgba(18, 31, 98, var(--high-sky-alpha)) 28%,
-      rgba(101, 190, 235, var(--sky-alpha)) 60%,
-      rgba(247, 174, 72, var(--ground-alpha)) 100%
+      rgba(34, 25, 98, var(--strato-alpha)) 24%,
+      rgba(18, 31, 98, var(--high-sky-alpha)) 42%,
+      rgba(38, 153, 211, var(--sky-alpha)) 66%,
+      rgba(252, 162, 140, var(--ground-alpha)) 100%
     );
   box-shadow: 0 0 0 4px var(--line), 0 20px 70px rgba(36, 25, 18, 0.22);
 }
 
+.phone-app::before,
+.phone-app::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.phone-app::before {
+  z-index: 0;
+  background:
+    linear-gradient(90deg, transparent 0 14%, rgba(255, 229, 89, calc(var(--sun-alpha) * 0.8)) 14% 16%, transparent 16% 28%) 0 22% / 64px 64px,
+    linear-gradient(0deg, transparent 0 84%, rgba(255, 229, 89, calc(var(--sun-alpha) * 0.75)) 84% 88%, transparent 88% 100%) 50% 22% / 64px 64px,
+    linear-gradient(90deg, transparent 0 12%, rgba(255, 230, 82, calc(var(--sun-alpha) * 0.65)) 12% 14%, transparent 14% 30%) 0 22% / 96px 96px,
+    linear-gradient(90deg, transparent 0 8%, rgba(255, 255, 255, calc(var(--cloud-scene-alpha) * 0.85)) 8% 32%, transparent 32% 100%) 0 20% / 154px 46px,
+    linear-gradient(90deg, transparent 0 24%, rgba(216, 241, 250, calc(var(--cloud-scene-alpha) * 0.7)) 24% 54%, transparent 54% 100%) 60px 32% / 188px 52px,
+    linear-gradient(135deg, transparent 0 62%, rgba(234, 249, 255, calc(var(--cloud-scene-alpha) * 0.82)) 62% 74%, transparent 74% 100%),
+    linear-gradient(225deg, transparent 0 58%, rgba(202, 230, 240, calc(var(--cloud-scene-alpha) * 0.72)) 58% 70%, transparent 70% 100%);
+}
+
+.phone-app::after {
+  z-index: 0;
+  opacity: 1;
+  background:
+    linear-gradient(90deg, transparent 0 48%, rgba(255, 255, 255, var(--star-alpha)) 48% 51%, transparent 51% 100%) 0 9% / 52px 52px,
+    linear-gradient(0deg, transparent 0 48%, rgba(255, 255, 255, var(--star-alpha)) 48% 51%, transparent 51% 100%) 0 9% / 52px 52px,
+    linear-gradient(90deg, transparent 0 50%, rgba(92, 211, 255, calc(var(--star-alpha) * 0.9)) 50% 53%, transparent 53% 100%) 18px 22% / 92px 92px,
+    linear-gradient(0deg, transparent 0 50%, rgba(92, 211, 255, calc(var(--star-alpha) * 0.9)) 50% 53%, transparent 53% 100%) 18px 22% / 92px 92px,
+    linear-gradient(135deg, transparent 0 42%, rgba(154, 76, 237, calc(var(--nebula-alpha) * 0.58)) 42% 48%, transparent 48% 100%) 0 0 / 100% 100%,
+    linear-gradient(135deg, transparent 0 52%, rgba(79, 188, 242, calc(var(--nebula-alpha) * 0.46)) 52% 56%, transparent 56% 100%) 0 0 / 100% 100%;
+}
+
 .play-screen {
+  position: relative;
+  z-index: 1;
   height: 100svh;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
