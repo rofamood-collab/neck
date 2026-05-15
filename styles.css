@@ -43,15 +43,36 @@ button {
 }
 
 .phone-app {
+  --altitude: 0;
+  --ground-alpha: 1;
+  --cloud-alpha: 1;
+  --sky-alpha: 1;
+  --high-sky-alpha: 0;
+  --space-alpha: 0;
+  --star-alpha: 0;
+  --cloud-shift: 0px;
   position: relative;
   width: min(100vw, 430px);
   height: 100svh;
   margin: 0 auto;
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(36, 25, 18, 0.06) 2px, transparent 2px) 0 0 / 16px 16px,
-    linear-gradient(0deg, rgba(36, 25, 18, 0.05) 2px, transparent 2px) 0 0 / 16px 16px,
-    linear-gradient(180deg, #ffe57b 0%, #f7a64d 58%, #72c8e6 100%);
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, var(--star-alpha)) 0 2px, transparent 3px) 0 0 / 116px 142px,
+    radial-gradient(circle at 72% 28%, rgba(255, 255, 255, var(--star-alpha)) 0 2px, transparent 3px) 0 0 / 168px 132px,
+    radial-gradient(circle at 44% 38%, rgba(255, 255, 255, calc(var(--star-alpha) * 0.75)) 0 1px, transparent 2px) 0 0 / 142px 166px,
+    radial-gradient(circle at 18% calc(26% + var(--cloud-shift)), rgba(255, 255, 255, calc(var(--cloud-alpha) * 0.9)) 0 22px, transparent 23px),
+    radial-gradient(circle at 72% calc(36% + var(--cloud-shift)), rgba(255, 255, 255, calc(var(--cloud-alpha) * 0.78)) 0 30px, transparent 31px),
+    linear-gradient(135deg, transparent 0 58%, rgba(93, 129, 61, calc(var(--ground-alpha) * 0.72)) 58% 69%, transparent 69%),
+    radial-gradient(circle at 24% calc(89% + var(--cloud-shift)), rgba(36, 116, 48, calc(var(--ground-alpha) * 0.82)) 0 26px, transparent 27px),
+    radial-gradient(circle at 68% calc(86% + var(--cloud-shift)), rgba(44, 137, 56, calc(var(--ground-alpha) * 0.7)) 0 34px, transparent 35px),
+    linear-gradient(90deg, rgba(36, 25, 18, 0.055) 2px, transparent 2px) 0 0 / 16px 16px,
+    linear-gradient(0deg, rgba(36, 25, 18, 0.045) 2px, transparent 2px) 0 0 / 16px 16px,
+    linear-gradient(180deg,
+      rgba(4, 7, 26, var(--space-alpha)) 0%,
+      rgba(18, 31, 98, var(--high-sky-alpha)) 28%,
+      rgba(101, 190, 235, var(--sky-alpha)) 60%,
+      rgba(247, 174, 72, var(--ground-alpha)) 100%
+    );
   box-shadow: 0 0 0 4px var(--line), 0 20px 70px rgba(36, 25, 18, 0.22);
 }
 
@@ -61,6 +82,9 @@ button {
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   padding: max(14px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
   overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(255, 239, 138, calc(0.45 * (1 - var(--altitude)))) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(0deg, rgba(255, 239, 138, calc(0.38 * (1 - var(--altitude)))) 1px, transparent 1px) 0 0 / 28px 28px;
 }
 
 .phone-app[data-screen="gate"] .play-screen {
@@ -154,10 +178,15 @@ button {
   min-height: 0;
   overflow: hidden;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   padding: 12px 0 0;
   isolation: isolate;
+  background: transparent;
+}
+
+.stage::before {
+  display: none;
 }
 
 .ruler {
@@ -209,19 +238,21 @@ button {
   --head-h: calc(238px * var(--scale));
   --body-h: calc(334px * var(--scale));
   width: var(--img-w);
-  max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform-origin: bottom center;
-  transform: none !important;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-1 * var(--head-h) + 96px)) !important;
+  transform-origin: top center;
   transition: transform 160ms ease;
   will-change: transform;
   margin-bottom: -2px;
 }
 
 .stretch-stack.pop {
-  transform: translateY(-5px);
+  transform: translate(-50%, calc(-1 * var(--head-h) + 90px)) !important;
 }
 
 .image-slice {
@@ -261,7 +292,9 @@ button {
 }
 
 .neck-column {
+  --neck-flow: 0px;
   position: relative;
+  flex: 0 0 auto;
   width: calc(42px * var(--scale));
   height: 0;
   min-height: 0;
@@ -273,8 +306,13 @@ button {
     linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0 10px, transparent 10px 100%),
     repeating-linear-gradient(0deg, rgba(116, 61, 42, 0.16) 0 12px, transparent 12px 24px),
     var(--skin);
+  background-position: 0 0, 0 var(--neck-flow), 0 0;
   transition: height 220ms cubic-bezier(0.18, 0.9, 0.18, 1);
   z-index: 1;
+}
+
+.stretch-stack.pop .neck-column {
+  animation: neck-grow-pulse 240ms steps(2, end);
 }
 
 .neck-cap {
@@ -534,6 +572,18 @@ input:focus {
   }
   75% {
     transform: translateX(7px);
+  }
+}
+
+@keyframes neck-grow-pulse {
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.24) saturate(1.12);
+  }
+  100% {
+    filter: brightness(1);
   }
 }
 
