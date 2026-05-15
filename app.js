@@ -26,6 +26,8 @@ const totalClicks = document.querySelector("#totalClicks");
 const topPlayer = document.querySelector("#topPlayer");
 const statsList = document.querySelector("#statsList");
 let audioContext = null;
+const clientId = createId();
+let lastSoundEventId = null;
 
 let selectedRole = "viewer";
 let currentUser = null;
@@ -40,6 +42,7 @@ const defaultState = {
   shrinkMm: 720,
   totalClicks: 0,
   users: {},
+  lastEvent: null,
   updatedAt: Date.now()
 };
 
@@ -72,8 +75,7 @@ function createChannel() {
     const nextChannel = new BroadcastChannel("bureokjam-neck");
     nextChannel.onmessage = event => {
       if (mode === "local") {
-        state = event.data;
-        render();
+        receiveState(event.data);
       }
     };
     return nextChannel;
@@ -109,9 +111,8 @@ async function connectFirebase() {
     syncNote.textContent = "실시간 연결 중...";
 
     onValue(remoteRef, snapshot => {
-      state = { ...defaultState, ...(snapshot.val() || {}) };
+      receiveState({ ...defaultState, ...(snapshot.val() || {}) });
       syncNote.textContent = "실시간 공유 중";
-      render();
     });
   } catch (error) {
     syncNote.textContent = "Firebase 연결 실패: 설정 확인 필요";
@@ -129,6 +130,7 @@ function switchRole(role) {
 
 function enterApp(event) {
   event?.preventDefault();
+  unlockAudio();
 
   if (selectedRole === "host") {
     if (passwordInput.value.trim() !== hostPassword) {
@@ -186,6 +188,12 @@ function normalizeGameState(current) {
 function clickNeck() {
   if (!currentUser) return;
   playClickSound(currentUser.role);
+  const clickEvent = {
+    id: createId(),
+    role: currentUser.role,
+    clientId,
+    at: Date.now()
+  };
 
   mutateState(current => {
     const users = { ...(current.users || {}) };
@@ -204,6 +212,7 @@ function clickNeck() {
 
     users[key] = user;
     current.users = users;
+    current.lastEvent = { ...clickEvent, name: key };
     current.totalClicks = Number(current.totalClicks || 0) + 1;
     current.updatedAt = Date.now();
     return current;
@@ -212,17 +221,35 @@ function clickNeck() {
   popStack();
 }
 
+function receiveState(nextState) {
+  const next = normalizeGameState({ ...defaultState, ...(nextState || {}) });
+  const event = next.lastEvent;
+
+  if (event?.id && event.id !== lastSoundEventId) {
+    const shouldPlayRemoteSound = Boolean(currentUser && lastSoundEventId && event.clientId !== clientId);
+    lastSoundEventId = event.id;
+
+    if (shouldPlayRemoteSound) {
+      playClickSound(event.role === "host" ? "host" : "viewer");
+    }
+  }
+
+  state = next;
+  render();
+}
+
 function render() {
   state = normalizeGameState(state);
 
   const mm = Math.max(0, Number(state.neckMm || 0));
   const displayMm = Math.round(mm * 10) / 10;
-  const height = Math.min(100000, Math.sqrt(mm) * 22);
+  const height = visualNeckHeight(mm);
   const altitude = altitudeProgress(mm);
   const background = backgroundProgress(mm);
   const lengthLabel = formatLength(mm);
   neckColumn.style.height = `${height}px`;
   neckColumn.style.setProperty("--neck-flow", `${-Math.round((mm / 1000) * 18)}px`);
+  stretchStack.style.setProperty("--zoom", visualZoom(height).toFixed(3));
   appRoot.style.setProperty("--altitude", altitude.toFixed(3));
   appRoot.style.setProperty("--ground-alpha", background.ground.toFixed(3));
   appRoot.style.setProperty("--cloud-alpha", background.cloud.toFixed(3));
@@ -304,6 +331,21 @@ function clamp01(value) {
   return Math.max(0, Math.min(1, value));
 }
 
+function visualNeckHeight(mm) {
+  if (mm <= 0) {
+    return 0;
+  }
+
+  const meters = mm / 1000;
+  const closeRange = 230 * (1 - Math.exp(-meters / 4.4));
+  const farRange = Math.max(0, Math.log10(Math.max(1, meters / 18))) * 32;
+  return Math.min(390, closeRange + farRange);
+}
+
+function visualZoom(height) {
+  return 1 - clamp01((height - 170) / 210) * 0.08;
+}
+
 function formatLength(mm) {
   if (mm >= 1_000_000) {
     return `${formatNumber(mm / 1_000_000)}킬로미터`;
@@ -320,7 +362,7 @@ function formatNumber(value) {
 
 function playClickSound(role) {
   try {
-    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+    unlockAudio();
     const now = audioContext.currentTime;
     const oscillator = audioContext.createOscillator();
     const gain = audioContext.createGain();
@@ -337,6 +379,20 @@ function playClickSound(role) {
   } catch {
     // Audio is optional; browsers may block it in some preview modes.
   }
+}
+
+function unlockAudio() {
+  audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+  if (audioContext.state === "suspended") {
+    audioContext.resume().catch(() => {});
+  }
+}
+
+function createId() {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function escapeHtml(value) {
