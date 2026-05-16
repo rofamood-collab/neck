@@ -4,10 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>부레옼잠 목늘리기</title>
-    <link rel="stylesheet" href="./styles.css?v=20260516-pixel-atmosphere" />
+    <link rel="stylesheet" href="./styles.css?v=20260516-solar-minimap" />
   </head>
   <body>
     <main class="phone-app" data-screen="gate">
+      <div class="bg-layers" aria-hidden="true">
+        <div class="bg-layer bg-ground"></div>
+        <div class="bg-layer bg-clouds"></div>
+        <div class="bg-layer bg-strato"></div>
+        <div class="bg-layer bg-space"></div>
+        <div class="bg-layer bg-solar"></div>
+      </div>
       <section class="play-screen" aria-label="부레옼잠 목늘리기">
         <header class="top-bar">
           <button class="icon-button" id="statsButton" type="button" aria-label="통계 보기">
@@ -25,13 +32,20 @@
         </div>
 
         <div class="stage" id="stage">
-          <div class="ruler" aria-hidden="true">
-            <span id="rulerValue">0mm</span>
+          <div class="altitude-map" id="altitudeMap" aria-hidden="true">
+            <div class="mini-pointer"></div>
+            <div class="mini-track">
+              <div class="mini-neck"></div>
+              <div class="mini-head"></div>
+              <div class="mini-body"></div>
+            </div>
+            <span id="rulerValue">0미터</span>
           </div>
 
           <div class="stretch-stack" id="stretchStack">
+            <img class="hair-layer" src="./character-head-hair.png?v=20260516-layered-head" alt="" />
             <div class="image-slice head-slice">
-              <img src="./character-pixel-transparent.png" alt="" />
+              <img src="./character-head.png?v=20260516-layered-head" alt="" />
             </div>
             <div class="neck-column" id="neckColumn">
               <div class="neck-cap top-cap"></div>
@@ -110,7 +124,7 @@
       </dialog>
     </main>
 
-    <script src="./firebase-config.js?v=20260516-pixel-atmosphere"></script>
-    <script src="./app.js?v=20260516-pixel-atmosphere"></script>
+    <script src="./firebase-config.js?v=20260516-solar-minimap"></script>
+    <script src="./app.js?v=20260516-solar-minimap"></script>
   </body>
 </html>
