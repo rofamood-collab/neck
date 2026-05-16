@@ -55,6 +55,11 @@ button {
   --space-alpha: 0;
   --star-alpha: 0;
   --nebula-alpha: 0;
+  --bg-ground-alpha: 1;
+  --bg-clouds-alpha: 0;
+  --bg-strato-alpha: 0;
+  --bg-space-alpha: 0;
+  --bg-solar-alpha: 0;
   --cloud-shift: 0px;
   position: relative;
   width: min(100vw, 430px);
@@ -62,6 +67,14 @@ button {
   margin: 0 auto;
   overflow: hidden;
   background:
+    linear-gradient(rgba(255, 255, 255, calc(1 - var(--bg-space-alpha))), rgba(255, 255, 255, calc(1 - var(--bg-space-alpha)))),
+    url("./bg-space-pixel.png"),
+    linear-gradient(rgba(255, 255, 255, calc(1 - var(--bg-strato-alpha))), rgba(255, 255, 255, calc(1 - var(--bg-strato-alpha)))),
+    url("./bg-strato-pixel.png"),
+    linear-gradient(rgba(255, 255, 255, calc(1 - var(--bg-clouds-alpha))), rgba(255, 255, 255, calc(1 - var(--bg-clouds-alpha)))),
+    url("./bg-clouds-pixel.png"),
+    linear-gradient(rgba(255, 255, 255, calc(1 - var(--bg-ground-alpha))), rgba(255, 255, 255, calc(1 - var(--bg-ground-alpha)))),
+    url("./bg-ground-pixel.png"),
     linear-gradient(90deg, transparent 0 10%, rgba(255, 255, 255, calc(var(--star-alpha) * 0.95)) 10% 11%, transparent 11% 24%) 0 0 / 88px 100%,
     linear-gradient(90deg, transparent 0 6%, rgba(255, 214, 75, calc(var(--star-alpha) * 0.9)) 6% 7%, transparent 7% 18%) 0 0 / 116px 100%,
     radial-gradient(circle at 70% 16%, rgba(245, 119, 170, calc(var(--nebula-alpha) * 0.72)) 0 18px, transparent 19px),
@@ -86,6 +99,34 @@ button {
       rgba(38, 153, 211, var(--sky-alpha)) 66%,
       rgba(252, 162, 140, var(--ground-alpha)) 100%
     );
+  background-size:
+    cover,
+    cover,
+    cover,
+    cover,
+    cover,
+    cover,
+    cover,
+    cover,
+    88px 100%,
+    116px 100%,
+    auto,
+    auto,
+    auto,
+    180px 76px,
+    230px 92px,
+    auto,
+    auto,
+    86px 100%,
+    118px 100%,
+    auto,
+    auto,
+    170px 28%,
+    auto,
+    16px 16px,
+    16px 16px,
+    auto;
+  background-position: center;
   box-shadow: 0 0 0 4px var(--line), 0 20px 70px rgba(36, 25, 18, 0.22);
 }
 
@@ -119,6 +160,53 @@ button {
     linear-gradient(0deg, transparent 0 50%, rgba(92, 211, 255, calc(var(--star-alpha) * 0.9)) 50% 53%, transparent 53% 100%) 18px 22% / 92px 92px,
     linear-gradient(135deg, transparent 0 42%, rgba(154, 76, 237, calc(var(--nebula-alpha) * 0.58)) 42% 48%, transparent 48% 100%) 0 0 / 100% 100%,
     linear-gradient(135deg, transparent 0 52%, rgba(79, 188, 242, calc(var(--nebula-alpha) * 0.46)) 52% 56%, transparent 56% 100%) 0 0 / 100% 100%;
+}
+
+.phone-app::before,
+.phone-app::after {
+  display: none;
+}
+
+.bg-layers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #0b122c;
+}
+
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  image-rendering: pixelated;
+  transition: opacity 420ms steps(6, end);
+}
+
+.bg-ground {
+  background-image: url("./bg-ground-pixel.png");
+  opacity: var(--bg-ground-alpha);
+}
+
+.bg-clouds {
+  background-image: url("./bg-clouds-pixel.png");
+  opacity: var(--bg-clouds-alpha);
+}
+
+.bg-strato {
+  background-image: url("./bg-strato-pixel.png");
+  opacity: var(--bg-strato-alpha);
+}
+
+.bg-space {
+  background-image: url("./bg-space-pixel.png");
+  opacity: var(--bg-space-alpha);
+}
+
+.bg-solar {
+  background-image: url("./bg-solar-pixel.png");
+  opacity: var(--bg-solar-alpha);
 }
 
 .play-screen {
@@ -280,46 +368,92 @@ button {
   animation: speed-lines 260ms steps(3, end);
 }
 
-.ruler {
+.altitude-map {
+  --mini-y: 0px;
   position: absolute;
-  left: 12px;
-  bottom: 18px;
-  top: 36px;
-  width: 5px;
-  border-radius: 0;
-  background: var(--line);
-  opacity: 0.9;
+  left: 7px;
+  bottom: 22px;
+  z-index: 2;
+  width: 64px;
+  height: 238px;
+  pointer-events: none;
 }
 
-.ruler::before,
-.ruler::after {
-  content: "";
+.mini-track {
+  position: absolute;
+  left: 23px;
+  bottom: 0;
+  width: 30px;
+  height: 218px;
+}
+
+.mini-neck {
+  position: absolute;
+  left: 13px;
+  bottom: 19px;
+  width: 5px;
+  height: var(--mini-y);
+  min-height: 14px;
+  background: #ffd2bd;
+  border-left: 3px solid var(--line);
+  border-right: 3px solid var(--line);
+  box-shadow: 3px 0 0 rgba(255, 255, 255, 0.42) inset;
+}
+
+.mini-head {
+  position: absolute;
+  left: 6px;
+  bottom: calc(18px + var(--mini-y));
+  width: 23px;
+  height: 28px;
+  border: 3px solid var(--line);
+  background:
+    linear-gradient(#f3352f, #f3352f) 0 0 / 6px 10px no-repeat,
+    linear-gradient(#ff5b5b, #ff5b5b) 3px 2px / 18px 18px no-repeat,
+    #ffe2d2;
+  box-shadow: 3px 3px 0 rgba(36, 25, 18, 0.25);
+}
+
+.mini-body {
   position: absolute;
   left: 0;
-  width: 42px;
-  height: 5px;
-  background: var(--line);
-}
-
-.ruler::before {
-  top: 0;
-}
-
-.ruler::after {
   bottom: 0;
+  width: 34px;
+  height: 22px;
+  border: 3px solid var(--line);
+  background:
+    linear-gradient(90deg, #fff 0 18%, transparent 18% 100%) 7px 7px / 8px 8px no-repeat,
+    var(--yellow);
+  box-shadow: 3px 3px 0 rgba(36, 25, 18, 0.25);
 }
 
-.ruler span {
+.mini-pointer {
   position: absolute;
-  top: 6px;
-  left: 13px;
-  min-width: 86px;
+  left: -6px;
+  bottom: calc(25px + var(--mini-y));
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 0;
+  border-right: 13px solid var(--line);
+}
+
+.altitude-map span {
+  position: absolute;
+  left: 0;
+  bottom: calc(52px + var(--mini-y));
+  width: 62px;
   border: 3px solid var(--line);
   border-radius: 0;
   background: #fffaf0;
-  padding: 5px 8px;
-  font-size: 13px;
+  padding: 3px 4px;
+  font-size: 10px;
+  line-height: 1.12;
   font-weight: 1000;
+  word-break: keep-all;
+  text-align: center;
+  box-shadow: 3px 3px 0 rgba(36, 25, 18, 0.24);
 }
 
 .stretch-stack {
@@ -327,6 +461,7 @@ button {
   --scale: 0.6;
   --img-w: calc(288px * var(--scale));
   --img-h: calc(572px * var(--scale));
+  --head-layer-h: calc(554px * var(--scale));
   --head-h: calc(238px * var(--scale));
   --body-h: calc(334px * var(--scale));
   width: var(--img-w);
@@ -336,6 +471,7 @@ button {
   position: absolute;
   left: 50%;
   top: 50%;
+  z-index: 3;
   transform: translate(-50%, calc(-1 * var(--head-h) + 96px)) scale(var(--zoom)) !important;
   transform-origin: top center;
   transition: transform 160ms ease;
@@ -367,16 +503,33 @@ button {
   filter: saturate(1.22) contrast(1.14) brightness(1.04);
 }
 
+.hair-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  width: var(--img-w);
+  height: var(--head-layer-h);
+  pointer-events: none;
+  user-select: none;
+  image-rendering: pixelated;
+  filter: saturate(1.22) contrast(1.14) brightness(1.04);
+}
+
 .head-slice {
   height: var(--head-h);
+  overflow: visible;
+  z-index: 5;
 }
 
 .head-slice img {
   top: 0;
+  height: var(--head-layer-h);
 }
 
 .body-slice {
   height: var(--body-h);
+  z-index: 3;
 }
 
 .body-slice img {
@@ -390,7 +543,7 @@ button {
   width: calc(42px * var(--scale));
   height: 0;
   min-height: 0;
-  margin-top: calc(-6px * var(--scale));
+  margin-top: calc(-20px * var(--scale));
   margin-bottom: calc(-8px * var(--scale));
   border-left: 5px solid #1f100d;
   border-right: 5px solid #1f100d;
@@ -400,7 +553,7 @@ button {
     var(--skin);
   background-position: 0 0, 0 var(--neck-flow), 0 0;
   transition: height 220ms cubic-bezier(0.18, 0.9, 0.18, 1);
-  z-index: 1;
+  z-index: 2;
 }
 
 .stretch-stack.pop .neck-column {
@@ -418,8 +571,9 @@ button {
 }
 
 .top-cap {
-  top: -4px;
+  top: -9px;
   border-bottom: 0;
+  opacity: 0.78;
 }
 
 .bottom-cap {
