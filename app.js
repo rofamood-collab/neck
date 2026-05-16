@@ -26,6 +26,7 @@ const altitudeMap = document.querySelector("#altitudeMap");
 const neckColumn = document.querySelector("#neckColumn");
 const stretchStack = document.querySelector("#stretchStack");
 const neckMessage = document.querySelector("#neckMessage");
+const zoneCaption = document.querySelector("#zoneCaption");
 const rulerValue = document.querySelector("#rulerValue");
 const totalClicks = document.querySelector("#totalClicks");
 const topPlayer = document.querySelector("#topPlayer");
@@ -384,6 +385,7 @@ function render() {
   appRoot.style.setProperty("--nebula-alpha", background.nebula.toFixed(3));
   appRoot.style.setProperty("--cloud-shift", `${background.cloudShift}px`);
   neckMessage.textContent = `부레옼잠의 목이 ${lengthLabel} 늘어났다!`;
+  zoneCaption.textContent = `현재 '${currentZone(mm)}'에 도달했습니다.`;
   rulerValue.textContent = lengthLabel;
 
   const users = Object.entries(state.users || {}).sort((a, b) => {
@@ -511,6 +513,23 @@ function formatLength(mm) {
     return `${formatNumber(mm / 1_000_000)}킬로미터`;
   }
   return `${formatNumber(mm / 1000)}미터`;
+}
+
+function currentZone(mm) {
+  const km = mm / 1_000_000;
+  if (km < 0.01) return "지상";
+  if (km < 12) return "하늘";
+  if (km < 50) return "성층권";
+  if (km < 85) return "중간권";
+  if (km < 100) return "우주 경계";
+  if (km < 384400) return "우주";
+  if (km < 54_600_000) return "달";
+  if (km < 225_000_000) return "화성";
+  if (km < 778_000_000) return "목성";
+  if (km < 1_430_000_000) return "토성";
+  if (km < 2_870_000_000) return "천왕성";
+  if (km < 4_500_000_000) return "해왕성";
+  return "명왕성";
 }
 
 function formatNumber(value) {
