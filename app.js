@@ -22,6 +22,7 @@ const clickVerb = document.querySelector("#clickVerb");
 const playerLabel = document.querySelector("#playerLabel");
 const syncNote = document.querySelector("#syncNote");
 const stage = document.querySelector("#stage");
+const altitudeMap = document.querySelector("#altitudeMap");
 const neckColumn = document.querySelector("#neckColumn");
 const stretchStack = document.querySelector("#stretchStack");
 const neckMessage = document.querySelector("#neckMessage");
@@ -355,13 +356,21 @@ function render() {
   const mm = Math.max(0, Number(state.neckMm || 0));
   const displayMm = Math.round(mm * 10) / 10;
   const height = visualNeckHeight(mm);
+  const miniHeight = visualMiniHeight(mm);
   const altitude = altitudeProgress(mm);
   const background = backgroundProgress(mm);
   const lengthLabel = formatLength(mm);
   neckColumn.style.height = `${height}px`;
   neckColumn.style.setProperty("--neck-flow", `${-Math.round((mm / 1000) * 18)}px`);
   stretchStack.style.setProperty("--zoom", visualZoom(height).toFixed(3));
+  altitudeMap.style.setProperty("--mini-y", `${miniHeight}px`);
+  altitudeMap.style.setProperty("--mini-pulse", mm > 0 ? "1" : "0");
   appRoot.style.setProperty("--altitude", altitude.toFixed(3));
+  appRoot.style.setProperty("--bg-ground-alpha", background.bgGround.toFixed(3));
+  appRoot.style.setProperty("--bg-clouds-alpha", background.bgClouds.toFixed(3));
+  appRoot.style.setProperty("--bg-strato-alpha", background.bgStrato.toFixed(3));
+  appRoot.style.setProperty("--bg-space-alpha", background.bgSpace.toFixed(3));
+  appRoot.style.setProperty("--bg-solar-alpha", background.bgSolar.toFixed(3));
   appRoot.style.setProperty("--ground-alpha", background.ground.toFixed(3));
   appRoot.style.setProperty("--city-alpha", background.city.toFixed(3));
   appRoot.style.setProperty("--sun-alpha", background.sun.toFixed(3));
@@ -430,6 +439,11 @@ function altitudeProgress(mm) {
 
 function backgroundProgress(mm) {
   const meters = mm / 1000;
+  const bgGround = 1 - clamp01((meters - 900) / 2600);
+  const bgClouds = clamp01((meters - 700) / 2600) * (1 - clamp01((meters - 15000) / 16000));
+  const bgStrato = clamp01((meters - 12000) / 15000) * (1 - clamp01((meters - 82000) / 28000));
+  const bgSpace = clamp01((meters - 76000) / 26000);
+  const bgSolar = clamp01((meters - 384400000) / 149600000000);
   const ground = 1 - clamp01(meters / 3500);
   const city = 1 - clamp01(meters / 1600);
   const sun = 1 - clamp01(meters / 7000);
@@ -443,6 +457,11 @@ function backgroundProgress(mm) {
   const nebula = clamp01((meters - 105000) / 220000);
 
   return {
+    bgGround,
+    bgClouds,
+    bgStrato,
+    bgSpace,
+    bgSolar,
     ground,
     city,
     sun,
@@ -475,6 +494,16 @@ function visualNeckHeight(mm) {
 
 function visualZoom(height) {
   return 1 - clamp01((height - 170) / 210) * 0.08;
+}
+
+function visualMiniHeight(mm) {
+  const meters = Math.max(0, mm / 1000);
+  if (meters <= 0) {
+    return 0;
+  }
+  const plutoDistanceMeters = 5_900_000_000_000;
+  const progress = Math.log10(1 + meters) / Math.log10(1 + plutoDistanceMeters);
+  return Math.round(12 + clamp01(progress) * 178);
 }
 
 function formatLength(mm) {
